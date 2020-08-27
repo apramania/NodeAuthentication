@@ -9,10 +9,13 @@ const jwt = require('jsonwebtoken')
 const {errorHandler} = require('../helpers/dbErrorHandling')
 //mail system
 const sgMail = require('@sendgrid/mail')
+//setting the mail key from sgMail
 sgMail.setApiKey(process.env.MAIL_KEY)
 
+//Register Controller
 exports.registerController = (req, res) => {
     const { name, email, password } = req.body
+    //perform express validation
     const errors = validationResult(req)
 
     if(!errors.isEmpty()){
@@ -21,6 +24,7 @@ exports.registerController = (req, res) => {
             error: firstError
         })
     }else{
+        //check to see if the user with the email exists
         User.findOne({
             email
         }).exec((err, user) => {
@@ -31,7 +35,7 @@ exports.registerController = (req, res) => {
                 })
             }
         })
-
+        //if the user is not present then generate a token for the new user
         //Generate JWT token
         const token = jwt.sign(
             {
@@ -44,6 +48,7 @@ exports.registerController = (req, res) => {
                 expiresIn: '15m'
             }
         )
+        
         //Email sending data
         const emailData = {
             from: process.env.EMAIL_FROM,
@@ -70,11 +75,13 @@ exports.registerController = (req, res) => {
     }
 }
 
+//Activation of account
 exports.activationController = (req, res) => {
     const { token } = req.body;
     console.log(token)
-  
+    //check to see if the token exists
     if (token) {
+        //we verify token
       jwt.verify(token, process.env.JWT_ACCOUNT_ACTIVATION, (err, decoded) => {
           console.log('1')
         if (err) {
@@ -83,15 +90,17 @@ exports.activationController = (req, res) => {
             errors: 'Expired link. Signup again'
           });
         } else {
+            //if it is succesfully verified then we decode the name, email and password from the token
           const { name, email, password } = jwt.decode(token);
   
           console.log(email);
+            //Create a new user instance of the model User
           const user = new User({
             name,
             email,
             password
           });
-  
+            //Save the instance
           user.save((err, user) => {
               console.log("Inside save")
             if (err) {
@@ -116,8 +125,9 @@ exports.activationController = (req, res) => {
     }
   };
 
-
+//Login controller
   exports.loginController = (req, res) => {
+      //destructure the email and password passed in from the body
     const { email, password } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -166,6 +176,7 @@ exports.activationController = (req, res) => {
     }
   };
   
+//Forgot password controller
   exports.forgotPasswordController = (req, res) => {
     const { email } = req.body;
     const errors = validationResult(req);
@@ -176,6 +187,7 @@ exports.activationController = (req, res) => {
         errors: firstError
       });
     } else {
+        //check to see if email exists
       User.findOne(
         {
           email
@@ -186,7 +198,7 @@ exports.activationController = (req, res) => {
               error: 'User with that email does not exist'
             });
           }
-  
+            //if exists email, create a token and pass it on to the email
           const token = jwt.sign(
             {
               _id: user._id
@@ -255,6 +267,7 @@ exports.activationController = (req, res) => {
         errors: firstError
       });
     } else {
+        //if reset password is set then verify the token
       if (resetPasswordLink) {
         jwt.verify(resetPasswordLink, process.env.JWT_RESET_PASSWORD, function(
           err,
@@ -265,7 +278,7 @@ exports.activationController = (req, res) => {
               error: 'Expired link. Try again'
             });
           }
-  
+            //check if the password was set
           User.findOne(
             {
               resetPasswordLink
@@ -276,7 +289,7 @@ exports.activationController = (req, res) => {
                   error: 'Something went wrong. Try later'
                 });
               }
-  
+                //updating the fields
               const updatedFields = {
                 password: newPassword,
                 resetPasswordLink: ''
