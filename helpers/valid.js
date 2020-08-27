@@ -3,6 +3,8 @@ const {
 } = require('express-validator');
 
 
+//perform the express validations 
+
 exports.validSign = [
     check('name', 'Name is required').notEmpty()
     .isLength({
