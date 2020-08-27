@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
+//Load validators to validate the input from the routes
 const {
     validSign,
     validLogin,
@@ -18,6 +19,7 @@ const {
     googleController
 } = require('../controllers/auth.controller.js')
 
+//create routes using validators and controllers
 router.post('/register', validSign , registerController)
 router.post('/login', validLogin , loginController)
 router.put('/forgotpassword', forgotPasswordValidator , forgotPasswordController)
@@ -26,5 +28,5 @@ router.post('/activation', activationController)
 
 
 router.post('/googlelogin', googleController)
-
+//exporting the routes
 module.exports = router
