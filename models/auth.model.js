@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-// user schema
+// Create user schema
 const userScheama = new mongoose.Schema(
   {
     email: {
@@ -34,7 +34,7 @@ const userScheama = new mongoose.Schema(
   }
 );
 
-// virtual
+// virtual password
 userScheama
   .virtual('password')
   .set(function(password) {
@@ -46,7 +46,7 @@ userScheama
     return this._password;
   });
 
-// methods
+// methods to encrypt the password
 userScheama.methods = {
   authenticate: function(plainText) {
     return this.encryptPassword(plainText) === this.hashed_password;
@@ -69,4 +69,5 @@ userScheama.methods = {
   }
 };
 
+//finally exporting the schema
 module.exports = mongoose.model('User', userScheama);
