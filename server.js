@@ -3,6 +3,7 @@ const morgan = require('morgan')
 const cors = require('cors')
 const connectDb = require('./config/db')
 
+//initialize the instance of express
 const app = express()
 
 //Convert .env to ./config/config.env
@@ -14,7 +15,7 @@ require('dotenv').config({
 connectDb()
 
 
-
+//initializing the middleware
 app.use(express.json({ extended: false }))
 
 
@@ -42,6 +43,7 @@ app.use((req, res) => {
     })
 })
 
+//declare the port number
 const PORT = process.env.PORT
 
 app.listen(PORT, () => {
